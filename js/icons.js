@@ -1,0 +1,37 @@
+// Íconos de línea (SVG en línea, sin dependencias). En el HTML se escriben como {{nombre}}
+// y iconizar() los reemplaza al pintar.
+const ICONOS = {
+  inicio: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  sobre: "M3 5h18v14H3z M3 6l9 7 9-7",
+  megafono: "M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z M15 9a4 4 0 0 1 0 6 M18 6a8 8 0 0 1 0 12",
+  libro: "M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z M4 19.5A1.5 1.5 0 0 0 5.5 21H20",
+  tarea: "M9 4h6v3H9z M7 5H5v16h14V5h-2 M8 12h8 M8 16h5",
+  grafico: "M4 20V4 M4 20h16 M8 16v-5 M12 16V8 M16 16v-3",
+  calendario: "M4 6h16v14H4z M4 10h16 M8 3v4 M16 3v4",
+  tarjeta: "M3 6h18v12H3z M3 10h18 M7 15h3",
+  usuario: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 21a8 8 0 0 1 16 0",
+  buscar: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4",
+  clip: "M20 11.5 11.5 20a5 5 0 0 1-7-7L13 4.5a3.5 3.5 0 0 1 5 5L9.5 18a2 2 0 0 1-3-3L14 7.5",
+  lapiz: "M4 20h4L19 9l-4-4L4 16z M13.5 6.5l4 4",
+  papelera: "M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6",
+  responder: "M9 14 4 9l5-5 M4 9h9a7 7 0 0 1 7 7v3",
+  respondertodos: "M7 14 2 9l5-5 M12 14 7 9l5-5 M7 9h7a6 6 0 0 1 6 6v4",
+  reenviar: "M15 14l5-5-5-5 M20 9h-9a7 7 0 0 0-7 7v3",
+  archivo: "M6 3h8l4 4v14H6z M14 3v4h4 M9 13h6 M9 17h6",
+  video: "M3 6h13v12H3z M16 10l5-3v10l-5-3",
+  enlace: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1 M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1",
+  candado: "M6 11h12v9H6z M8 11V8a4 4 0 0 1 8 0v3",
+  info: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M12 11v6 M12 7.5v.5",
+  play: "M7 4l13 8-13 8z",
+  descargar: "M12 4v12 M7 11l5 5 5-5 M4 20h16",
+  imprimir: "M7 8V3h10v5 M7 17H4V9a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8h-3 M7 14h10v7H7z",
+  laptop: "M5 5h14v10H5z M2 19h20",
+  celular: "M8 2h8a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z M11 18h2",
+  hecho: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M8 12l3 3 5-6",
+  circulo: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z",
+  mas: "M12 5v14 M5 12h14",
+  izq: "M15 5l-7 7 7 7",
+  der: "M9 5l7 7-7 7",
+};
+function ic(n) { return `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONOS[n]}"/></svg>`; }
+function iconizar(html) { return html.replace(/\{\{(\w+)\}\}/g, (t, n) => (ICONOS[n] ? ic(n) : t)); }

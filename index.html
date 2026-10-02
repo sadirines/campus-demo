@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campus — Maqueta</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- Barra de la demo: no forma parte del producto -->
+<div id="demo-bar">
+  <strong>MAQUETA · Opción 1 (base)</strong> <a href="opcion2/index.html">ver Opción 2</a> <span>Datos ficticios · nada se envía ni se guarda en un servidor</span>
+  <span class="sep"></span>
+  <label>Ver como:
+    <select id="rol-select" onchange="cambiarRol(this.value)">
+      <option value="familia">Familia (madre/padre/tutor)</option>
+      <option value="alumno">Alumno</option>
+      <option value="docente">Docente</option>
+      <option value="secretaria">Secretaría / Dirección</option>
+    </select>
+  </label>
+  <button onclick="reiniciar()">Reiniciar datos</button>
+</div>
+
+<!-- Pantalla de acceso -->
+<div id="login" style="display:none">
+  <div class="topbar"><div class="logo">JH</div><div class="colegio">Complejo Educativo José Hernández<small>Campus · Búho Escuela</small></div></div>
+  <div style="display:grid;place-items:center;padding:60px 16px">
+    <div class="panel" style="width:min(380px,100%)">
+      <h2>Campus virtual</h2>
+      <div class="campo"><label>Usuario</label><input type="text" value="usuario.demo"></div>
+      <div class="campo"><label>Clave</label><input type="password" value="demo1234" style="width:100%"></div>
+      <p><label><input type="checkbox"> Recordarme</label></p>
+      <button class="primario" style="width:100%" onclick="ingresar()">Acceder</button>
+      <p class="small" style="text-align:center"><a>¿Olvidaste tus datos?</a></p>
+      <p class="small muted">Un solo usuario para el campus y para el pago de cuotas (mismo acceso que la extranet de Búho).</p>
+    </div>
+  </div>
+</div>
+
+<!-- Aplicación -->
+<div id="app">
+  <div id="topbar">
+    <div class="logo" onclick="location.hash='#/inicio'" style="cursor:pointer">JH</div>
+    <div class="colegio">Complejo Educativo José Hernández<small>Campus · Búho Escuela</small></div>
+    <div id="breadcrumb"></div>
+    <div class="top-accion" id="top-sobre" title="Mensajes no leídos" onclick="if(!event.target.closest('.panel-flotante'))panelNoLeidos()"></div>
+    <div class="top-accion usuario" id="top-usuario" onclick="if(!event.target.closest('.panel-flotante'))panelUsuario()"></div>
+  </div>
+  <div id="layout">
+    <div id="rail"></div>
+    <nav id="menu"></nav>
+    <main id="main"></main>
+  </div>
+  <footer><span>Campus · Búho Escuela — Ingeniería &amp; Software</span><span>Maqueta funcional · v0.1</span></footer>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
