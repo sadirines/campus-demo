@@ -229,43 +229,6 @@ td.desaprobado { color: var(--rojo); font-weight: 700; }
 #menu .item .ic { width: 20px; height: 20px; }
 #top-sobre .ic { width: 22px; height: 22px; }
 
-/* ───────── Opción 2: mejoras ───────── */
-.av { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 700; margin-right: 8px; vertical-align: middle; flex-shrink: 0; }
-.chip.e2 { background: #e8e0f7; color: #4b2e83; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.tile { background: #fff; border: 1px solid var(--borde); padding: 14px 16px; }
-.tile .valor { font-size: 30px; font-weight: 500; line-height: 1.1; }
-.tile .rotulo { font-weight: 500; margin-top: 4px; }
-.hoy-franja { border-left: 4px solid var(--rojo); }
-.hoy-item { display: flex; gap: 10px; align-items: center; padding: 9px 4px; border-bottom: 1px solid #eee; color: var(--texto); }
-.hoy-item:hover { background: #fafafa; }
-.hoy-item .flecha { margin-left: auto; color: var(--texto-sec); }
-.hoy-item.urgente .ic { color: var(--rojo); }
-.grafico { width: 100%; max-width: 640px; height: auto; display: block; }
-.g-grilla { stroke: #ececec; stroke-width: 1; }
-.g-eje { font-size: 11px; fill: #777; }
-.g-ref { stroke: #999; stroke-width: 1; stroke-dasharray: 4 4; }
-.g-linea { fill: none; stroke: #2a6fb0; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.g-punto { fill: #2a6fb0; stroke: #fff; stroke-width: 2; }
-.g-valor { font-size: 13px; font-weight: 700; fill: #222; }
-.bien-num { width: 44px; height: 44px; border-radius: 50%; background: var(--verde-sel); display: grid; place-items: center; font-size: 20px; font-weight: 700; margin: 0 auto 8px; }
-.bien-punto { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ddd; margin: 0 3px; }
-.bien-punto.activo { background: var(--rojo); }
-.item-mas { padding: 12px 4px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 15px; }
-#tabbar { display: none; }
-@media (max-width: 800px) {
-  #menu { display: none !important; }
-  #tabbar { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--borde); z-index: 30; }
-  #tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 6px; font-size: 11px; color: var(--texto-sec); position: relative; }
-  #tabbar a.activo { color: var(--rojo); }
-  #tabbar .ic { width: 22px; height: 22px; }
-  #tabbar .badge { position: absolute; top: 4px; left: 55%; background: var(--rojo); color: #fff; }
-  footer { display: none; }
-  #main { padding-bottom: 84px; }
-  .usuario span.av { display: inline-grid; }
-}
-@media print { #tabbar { display: none !important; } }
-
 @media (max-width: 800px) { .panel { overflow-x: auto; } }
 
 /* ───────── Mejoras de usabilidad ───────── */
@@ -291,15 +254,3 @@ td.desaprobado { color: var(--rojo); font-weight: 700; }
   .tabla-notas td:first-child { display: block; font-weight: 500; }
   .tabla-notas td[data-label]::before { content: attr(data-label) ": "; color: var(--texto-sec); font-size: 12px; font-weight: 400; }
 }
-
-/* ───────── Versión 3: aula ───────── */
-.migas { font-size: 13px; color: var(--texto-sec); margin-bottom: 10px; }
-.migas a { color: var(--rojo); }
-.objetivos { background: #f7f9f7; border-left: 3px solid #b9dbb9; padding: 8px 12px; margin: 8px 0 12px; }
-.objetivos ul, .origen ul { margin: 6px 0 0; padding-left: 20px; }
-.fila-tarea td { background: #fbfbfb; font-size: 13px; }
-.fila-tarea td:nth-child(2) { padding-left: 24px; }
-.tarea-card { border: 1px solid var(--borde); border-radius: 4px; padding: 12px; margin-bottom: 10px; }
-.origen { background: #f7f9f7; border-left: 3px solid #b9dbb9; padding: 8px 12px; margin-top: 16px; }
-.foro-msg { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; }
-.foro-msg .msg-cuerpo { margin-top: 4px; }

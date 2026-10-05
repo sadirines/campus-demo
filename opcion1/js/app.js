@@ -1,6 +1,6 @@
 // Maqueta navegable del Campus. Sin servidor: el estado vive en memoria y se
 // guarda en localStorage para que la demo recuerde lo que se hizo.
-const CLAVE_STORAGE = "campus-maqueta-v3";
+const CLAVE_STORAGE = "campus-maqueta-v1";
 
 function estadoInicial() {
   return JSON.parse(JSON.stringify({
@@ -12,7 +12,7 @@ function estadoInicial() {
     contenidos: CONTENIDOS_INICIALES,
     tareas: TAREAS_INICIALES,
     notas: NOTAS_INICIALES,
-    publicado: { 0: true, 1: true, 2: true }, ausencias: AUSENCIAS_INICIALES, bienvenida: {}, // períodos publicados a las familias
+    publicado: { 0: true, 1: true }, // períodos publicados a las familias
     eventos: EVENTOS_INICIALES,
     prefs: { avisoMensajes: true, avisoComunicados: true, avisoNotas: true, avisoEntregas: false },
     calMes: HOY.slice(0, 7),
@@ -66,7 +66,7 @@ function notaMaqueta(t) { return `<div class="nota-maqueta no-print">{{info}} Ma
 // Alumno "en foco": el propio alumno, o el hijo elegido por la familia.
 function alumnoFoco() { return S.rol === "alumno" ? yo() : S.rol === "familia" ? S.hijo : null; }
 function cursoDeAlumno(a) { return Object.keys(ALUMNOS_CURSO).find((c) => ALUMNOS_CURSO[c].includes(a)); }
-function materiasDeCurso(c) { return c === CURSO_ACT() ? MATERIAS : MATERIAS.filter((m) => m.tipo === "troncal"); }
+function materiasDeCurso(c) { return c === "7B" ? MATERIAS : MATERIAS.filter((m) => m.tipo === "troncal"); }
 function cursosVisibles() {
   if (S.rol === "familia") return ROLES.familia.hijos.map(cursoDeAlumno);
   if (S.rol === "alumno") return [ROLES.alumno.curso];
@@ -115,8 +115,8 @@ function render() {
   const [sec, ...args] = ruta();
   renderTop(sec);
   renderMenu(sec);
-  const vistas = { inicio: vInicio, mensajes: vMensajes, comunicados: vComunicados, materias: vMaterias, tareas: vTareas, calificaciones: vCalificaciones, boletin: vBoletin, calendario: vCalendario, cuotas: vCuotas, perfil: vPerfil, panel: vPanel };
-  const permitido = MENU[S.rol].includes(sec) || ["perfil", "boletin"].concat(S.rol === "alumno" || S.rol === "docente" ? ["tareas"] : []).includes(sec);
+  const vistas = { inicio: vInicio, mensajes: vMensajes, comunicados: vComunicados, materias: vMaterias, tareas: vTareas, calificaciones: vCalificaciones, boletin: vBoletin, calendario: vCalendario, cuotas: vCuotas, perfil: vPerfil };
+  const permitido = MENU[S.rol].includes(sec) || ["perfil", "boletin"].includes(sec);
   $("#main").innerHTML = iconizar((S.rol === "familia" && TABS_HIJOS.includes(sec) ? tabsHijos(sec) : "") + (permitido && vistas[sec] ? vistas[sec](...args) : `<div class="panel">Esta sección no está disponible para el rol ${ROLES[S.rol].etiqueta}.</div>`));
   window.scrollTo(0, 0);
 }
@@ -125,8 +125,8 @@ function renderTop(sec) {
   const p = PERSONAS[yo()];
   const n = noLeidos().length;
   const titulo = SECCIONES[sec] ? SECCIONES[sec].t : sec === "boletin" ? "Boletín" : "";
-  const contexto = S.rol === "familia" ? (TABS_HIJOS.includes(sec) ? `${nombre(S.hijo)} · ${curso(cursoDeAlumno(S.hijo)).nombre}` : `Familia de ${ROLES.familia.hijos.map(primerNombre).join(", ").replace(/, ([^,]*)$/, " y $1")}`)
-    : S.rol === "alumno" ? `${curso(CURSO_ACT()).nombre} · Nivel ${curso(CURSO_ACT()).nivel}` : S.rol === "docente" ? `${curso(CURSO_ACT()).nombre} · Ciclo Lectivo ${COLEGIO.ciclo}` : `Ciclo Lectivo ${COLEGIO.ciclo}`;
+  const contexto = S.rol === "familia" ? (TABS_HIJOS.includes(sec) ? `${nombre(S.hijo)} · ${curso(cursoDeAlumno(S.hijo)).nombre}` : `Familia de ${ROLES.familia.hijos.map(primerNombre).join(" y ")}`)
+    : S.rol === "alumno" ? `${curso("7B").nombre} Nivel Primario` : S.rol === "docente" ? `${curso("7B").nombre} · Ciclo Lectivo ${COLEGIO.ciclo}` : `Ciclo Lectivo ${COLEGIO.ciclo}`;
   $("#breadcrumb").innerHTML = `${esc(contexto)} › <b>${esc(titulo)}</b>`;
   $("#top-sobre").innerHTML = iconizar(`{{sobre}} ${n ? `<span class="badge">${n}</span>` : ""}`);
   $("#top-usuario").innerHTML = `<span>${esc(p.nombre)}</span> ▾`;
@@ -188,7 +188,7 @@ function verEvento(id) {
   modal(e.titulo, `<p><span class="chip et-${e.etiqueta}">${e.etiqueta}</span></p>
     <p><b>${DIAS_LARGO[d.getDay()][0].toUpperCase() + DIAS_LARGO[d.getDay()].slice(1)} ${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}</b> · todo el día</p>
     <p class="muted">Para: ${esc(para)}${e.autor ? ` · Cargado por ${esc(nombre(e.autor))}` : ""}</p>
-    <div class="toolbar"><span class="sep"></span>${e.auto && (S.rol === "alumno" || S.rol === "docente") ? `<button onclick="location.hash='#/tareas/${String(e.id).slice(1)}'">Ver la tarea</button>` : ""}<button class="primario" onclick="cerrarModal()">Cerrar</button></div>`);
+    <div class="toolbar"><span class="sep"></span>${e.auto && MENU[S.rol].includes("tareas") ? `<button onclick="location.hash='#/tareas/${String(e.id).slice(1)}'">Ver la tarea</button>` : ""}<button class="primario" onclick="cerrarModal()">Cerrar</button></div>`);
 }
 function listaMensajes(ms) {
   return ms.length ? `<table>${ms.slice(0, 5).map((m) => `<tr class="fila ${noLeido(m) ? "no-leido" : ""}" onclick="location.hash='#/mensajes/ver/${m.id}'"><td>${noLeido(m) ? '<span class="punto"></span>' : ""}${esc(m.asunto)} ${m.adj.length ? "{{clip}}" : ""}<div class="small muted">${esc(nombre(m.de))} — ${esc(rolDe(m.de))}</div></td><td class="small muted" style="white-space:nowrap">${fDia(m.fecha)}</td></tr>`).join("")}</table>` : `<p class="muted">No tenés mensajes sin leer.</p>`;
@@ -210,7 +210,7 @@ function vInicio() {
     }
     h += `<div class="panel"><h3>{{calendario}} Próximas fechas</h3>${listaEventos(proximosEventos(), 6)}</div>`;
     if (r === "alumno") {
-      const sig = S.contenidos.find((c) => c.curso === ROLES.alumno.curso && c.obligatorio && !c.vistoPor.includes(yo()));
+      const sig = S.contenidos.find((c) => c.obligatorio && !c.vistoPor.includes(yo()));
       h += `<div class="panel"><h3>{{play}} Retomar</h3>${sig ? `<p>Siguiente contenido pendiente:</p><p><a onclick="location.hash='#/materias/${sig.materia}/${sig.id}'"><b>${esc(sig.titulo)}</b></a><br><span class="small muted">${esc(materia(sig.materia).nombre)} · ${esc(sig.unidad)}</span></p>` : "<p>Estás al día con todos los contenidos.</p>"}</div>`;
     }
     const ult = REGIMEN.periodos.map((_, i) => i).filter((i) => S.publicado[i]).pop();
@@ -221,7 +221,7 @@ function vInicio() {
     h += `<div class="panel"><h3>{{sobre}} Mensajes sin leer (${noLeidos().length})</h3>${listaMensajes(noLeidos())}<a onclick="location.hash='#/mensajes'">Ir a la bandeja →</a></div>`;
     const porCorregir = S.tareas.filter((t) => ROLES.docente.materias.includes(t.materia)).flatMap((t) => Object.entries(t.entregas).filter(([, e]) => e.nota == null).map(([al]) => ({ t, al })));
     h += `<div class="panel"><h3>{{tarea}} Entregas por corregir (${porCorregir.length})</h3>${porCorregir.length ? `<table>${porCorregir.map(({ t, al }) => `<tr class="fila" onclick="location.hash='#/tareas/${t.id}'"><td>${esc(nombre(al))}</td><td>${esc(t.titulo)}</td></tr>`).join("")}</table>` : "<p class='muted'>No hay entregas pendientes de corrección.</p>"}</div>`;
-    h += `<div class="panel"><h3>{{grafico}} Carga de notas — ${REGIMEN.periodos[REGIMEN.periodoActual]}</h3><table>${ROLES.docente.materias.map((m) => { const p = progresoCarga(CURSO_ACT(), m, REGIMEN.periodoActual); return `<tr class="fila" onclick="location.hash='#/calificaciones/${m}'"><td>${esc(materia(m).nombre)}</td><td style="width:45%"><div class="barra"><div style="width:${p}%"></div></div></td><td class="small">${p}%</td></tr>`; }).join("")}</table></div>`;
+    h += `<div class="panel"><h3>{{grafico}} Carga de notas — ${REGIMEN.periodos[REGIMEN.periodoActual]}</h3><table>${ROLES.docente.materias.map((m) => { const p = progresoCarga("7B", m, REGIMEN.periodoActual); return `<tr class="fila" onclick="location.hash='#/calificaciones/${m}'"><td>${esc(materia(m).nombre)}</td><td style="width:45%"><div class="barra"><div style="width:${p}%"></div></div></td><td class="small">${p}%</td></tr>`; }).join("")}</table></div>`;
     h += `<div class="panel"><h3>{{calendario}} Próximas fechas</h3>${listaEventos(proximosEventos(), 6)}</div>`;
   }
   if (r === "secretaria") {
@@ -267,7 +267,7 @@ function vMensajes(carpeta = "recibidos", arg) {
       <span class="sep"></span><span class="small muted">${lista.length} mensajes</span></div>
     <table>${lista.map((m) => `<tr class="fila ${noLeido(m) ? "no-leido" : ""}">
       <td style="width:28px"><input type="checkbox" class="selm" value="${m.id}" onclick="event.stopPropagation()"></td>
-      <td onclick="location.hash='#/mensajes/ver/${m.id}'" style="width:30%">${noLeido(m) ? '<span class="punto"></span>' : ""}${carpeta === "enviados" ? "Para: " + esc(resumenPara(m.para)) : avatar(m.de) + esc(nombre(m.de)) + ` <span class="small muted">— ${esc(rolDe(m.de))}</span>`}</td>
+      <td onclick="location.hash='#/mensajes/ver/${m.id}'" style="width:30%">${noLeido(m) ? '<span class="punto"></span>' : ""}${carpeta === "enviados" ? "Para: " + esc(resumenPara(m.para)) : esc(nombre(m.de)) + ` <span class="small muted">— ${esc(rolDe(m.de))}</span>`}</td>
       <td onclick="location.hash='#/mensajes/ver/${m.id}'">${(m.etiquetas[yo()] || []).map((e) => `<span class="chip" style="background:${ETIQUETAS_MAIL.find((x) => x.id === e).color}">${ETIQUETAS_MAIL.find((x) => x.id === e).nombre}</span>`).join("")}${esc(m.asunto)}</td>
       <td onclick="location.hash='#/mensajes/ver/${m.id}'" class="small muted" style="white-space:nowrap">${m.adj.length ? "{{clip}} " + m.adj[0].t : ""}</td>
       <td onclick="location.hash='#/mensajes/ver/${m.id}'" class="small" style="white-space:nowrap">${fFechaHora(m.fecha)}</td></tr>`).join("") || `<tr><td class="muted">No hay mensajes.</td></tr>`}</table>
@@ -326,7 +326,7 @@ function vMensaje(id) {
   <div class="panel">
     <div class="msg-head">
       <h2>${esc(m.asunto)}</h2>
-      <div><b>De:</b> ${avatar(m.de)}${esc(nombre(m.de))} <span class="muted">— ${esc(rolDe(m.de))}</span></div>
+      <div><b>De:</b> ${esc(nombre(m.de))} <span class="muted">— ${esc(rolDe(m.de))}</span></div>
       <div><b>Para:</b> ${m.para.map((p) => esc(nombre(p))).join(", ")}</div>
       <div class="small muted">${fFechaHora(m.fecha)}</div>
     </div>
@@ -355,7 +355,7 @@ function reenviar(id) {
 // Destinatarios disponibles por grupo según el rol.
 function destinatariosPorGrupo() {
   const out = {};
-  const cursoAlumnos = S.rol === "familia" ? cursoDeAlumno(S.hijo) : CURSO_ACT();
+  const cursoAlumnos = S.rol === "familia" ? cursoDeAlumno(S.hijo) : "7B";
   for (const g of GRUPOS_DESTINO[S.rol]) {
     let ids = Object.keys(PERSONAS).filter((id) => PERSONAS[id].grupo === g && id !== yo());
     if (g === "Alumnos") ids = ALUMNOS_CURSO[cursoAlumnos].filter((id) => id !== yo());
@@ -367,7 +367,7 @@ let borrador = null;
 function abrirRedactar(pre = {}) {
   borrador = { para: pre.para || [], asunto: pre.asunto || "", cuerpo: pre.cuerpo || "", adj: pre.adj ? [...pre.adj] : [] };
   const grupos = destinatariosPorGrupo();
-  const etiquetaGrupo = (g) => (g === "Alumnos" && S.rol === "alumno" ? "Compañeros" : g === "Alumnos" ? `Alumnos de ${curso(CURSO_ACT()).nombre}` : g === "Familias" ? (S.rol === "docente" ? `Familias de ${curso(CURSO_ACT()).nombre}` : "Familias") : g);
+  const etiquetaGrupo = (g) => (g === "Alumnos" && S.rol === "alumno" ? "Compañeros" : g === "Alumnos" ? `Alumnos de ${curso("7B").nombre}` : g === "Familias" ? (S.rol === "docente" ? `Familias de ${curso("7B").nombre}` : "Familias") : g);
   modal("Enviar mensaje", `
     <div class="campo"><label>Para</label>
       <div id="r-sel" class="sel-chips"></div><input type="text" placeholder="Buscar persona…" oninput="filtrarDest(this.value)" style="width:100%;margin-bottom:6px"><div class="destinatarios" onchange="pintarSeleccion()">${Object.entries(grupos).map(([g, ids]) => `
@@ -508,7 +508,7 @@ function vMateria(mat) {
   const cs = S.contenidos.filter((c) => c.materia === mat && (filtro === "todos" || (filtro === "obl") === c.obligatorio));
   const unidades = [...new Set(cs.map((c) => c.unidad))];
   const icono = { texto: "{{archivo}}", archivo: "{{clip}}", video: "{{video}}", enlace: "{{enlace}}" };
-  const total = ALUMNOS_CURSO[CURSO_ACT()].length;
+  const total = ALUMNOS_CURSO["7B"].length;
   return `<div class="toolbar"><button onclick="location.hash='#/materias'">← Materias</button><h2 style="margin:0 12px">${esc(m.nombre)}</h2><span class="sep"></span>
     <select onchange="S.filtroObl=this.value;render()"><option value="todos">Todos</option><option value="obl" ${filtro === "obl" ? "selected" : ""}>Obligatorios</option><option value="opc" ${filtro === "opc" ? "selected" : ""}>Opcionales</option></select>
     ${S.rol === "docente" ? `<button class="primario" onclick="nuevoContenido('${mat}')">{{mas}} Agregar contenido</button>` : ""}</div>
@@ -553,7 +553,7 @@ function guardarContenido(mat) {
 }
 
 // ───────────────────────── TAREAS (opcional) ─────────────────────────
-function tareasDeAlumno(a) { const ms = materiasDeCurso(cursoDeAlumno(a)).map((m) => m.id); return S.tareas.filter((t) => ms.includes(t.materia) && cursoDeAlumno(a) === CURSO_ACT()); }
+function tareasDeAlumno(a) { const ms = materiasDeCurso(cursoDeAlumno(a)).map((m) => m.id); return S.tareas.filter((t) => ms.includes(t.materia) && cursoDeAlumno(a) === "7B"); }
 function estadoTarea(t, a) {
   const e = t.entregas[a];
   if (e && e.nota != null) return { clave: "corregida", html: `<span class="chip ok">Corregida · ${e.nota}</span>` };
@@ -570,7 +570,7 @@ function vTareas(id) {
   const lista = tareasDeAlumno(a).filter((t) => filtro === "todas" || estadoTarea(t, a).clave === filtro).sort((x, y) => x.entrega.localeCompare(y.entrega));
   return `<h1 class="titulo-pagina">Tareas y entregas${S.rol === "familia" ? " — " + esc(nombre(a)) : ""}</h1>${aviso}
   <div class="tabs">${[["todas", "Todas"], ["pendiente", "Pendientes"], ["atrasada", "Vencidas"], ["entregada", "Entregadas"], ["corregida", "Corregidas"]].map(([k, t]) => `<button class="${filtro === k ? "activo" : ""}" onclick="S.filtroTarea='${k}';render()">${t}</button>`).join("")}</div>
-  <div class="panel"><table><tr><th>Tarea</th><th>Materia</th><th>Entrega</th><th>Estado</th></tr>${lista.map((t) => `<tr class="fila" onclick="location.hash='#/tareas/${t.id}'"><td>${esc(t.titulo)}</td><td>${esc(materia(t.materia).nombre)}</td><td style="white-space:nowrap">${fFecha(t.entrega)} <div class="small muted">${cuandoTexto(t.entrega)}</div></td><td>${estadoTarea(t, a).html}</td></tr>`).join("") || `<tr><td class="muted">${cursoDeAlumno(a) === CURSO_ACT() ? "No hay tareas en este filtro." : "Sin tareas cargadas para este curso."}</td></tr>`}</table></div>`;
+  <div class="panel"><table><tr><th>Tarea</th><th>Materia</th><th>Entrega</th><th>Estado</th></tr>${lista.map((t) => `<tr class="fila" onclick="location.hash='#/tareas/${t.id}'"><td>${esc(t.titulo)}</td><td>${esc(materia(t.materia).nombre)}</td><td style="white-space:nowrap">${fFecha(t.entrega)} <div class="small muted">${cuandoTexto(t.entrega)}</div></td><td>${estadoTarea(t, a).html}</td></tr>`).join("") || `<tr><td class="muted">${cursoDeAlumno(a) === "7B" ? "No hay tareas en este filtro." : "Sin tareas cargadas para este curso."}</td></tr>`}</table></div>`;
 }
 function vTareaAlumno(id, a) {
   const t = S.tareas.find((x) => x.id === id);
@@ -589,7 +589,7 @@ function entregarTarea(id, f) {
 }
 function vTareasDocente(aviso) {
   const lista = S.tareas.filter((t) => ROLES.docente.materias.includes(t.materia));
-  const total = ALUMNOS_CURSO[CURSO_ACT()].length;
+  const total = ALUMNOS_CURSO["7B"].length;
   return `<h1 class="titulo-pagina">Tareas y entregas</h1>${aviso}
   <div class="toolbar"><button class="primario" onclick="nuevaTarea()">{{mas}} Nueva tarea</button></div>
   <div class="panel"><table><tr><th>Tarea</th><th>Materia</th><th>Entrega</th><th>Entregaron</th><th>Por corregir</th></tr>${lista.map((t) => { const es = Object.values(t.entregas); return `<tr class="fila" onclick="location.hash='#/tareas/${t.id}'"><td>${esc(t.titulo)}</td><td>${esc(materia(t.materia).nombre)}</td><td>${fFecha(t.entrega)}</td><td>${es.length}/${total}</td><td>${es.filter((e) => e.nota == null).length}</td></tr>`; }).join("")}</table></div>`;
@@ -599,7 +599,7 @@ function vTareaDocente(id) {
   return `<div class="toolbar"><button onclick="location.hash='#/tareas'">← Tareas</button></div>
   <div class="panel"><p class="small muted">${esc(materia(t.materia).nombre)} · Entrega ${fFecha(t.entrega)}</p><h2>${esc(t.titulo)}</h2><p>${esc(t.consigna)}</p></div>
   <div class="panel"><h3>Entregas</h3><table><tr><th>Alumno</th><th>Estado</th><th>Archivo</th><th class="num">Nota</th><th>Devolución</th></tr>
-  ${ALUMNOS_CURSO[CURSO_ACT()].map((a) => { const e = t.entregas[a]; return `<tr><td>${esc(nombre(a))}</td><td>${estadoTarea(t, a).html}</td><td>${e ? "{{clip}} " + esc(e.archivo) : "—"}</td>
+  ${ALUMNOS_CURSO["7B"].map((a) => { const e = t.entregas[a]; return `<tr><td>${esc(nombre(a))}</td><td>${estadoTarea(t, a).html}</td><td>${e ? "{{clip}} " + esc(e.archivo) : "—"}</td>
     <td class="num">${e ? `<input type="number" min="1" max="10" style="width:60px" value="${e.nota ?? ""}" onchange="S.tareas.find(x=>x.id===${id}).entregas['${a}'].nota=this.value?+this.value:null;guardar()">` : ""}</td>
     <td>${e ? `<input style="width:100%" value="${esc(e.devolucion || "")}" onchange="S.tareas.find(x=>x.id===${id}).entregas['${a}'].devolucion=this.value;guardar()">` : ""}</td></tr>`; }).join("")}</table>
   <div class="toolbar" style="margin-top:12px"><span class="sep"></span><button class="primario" onclick="render();toast('Correcciones guardadas y devueltas a los alumnos')">Guardar y devolver</button></div></div>`;
@@ -645,25 +645,25 @@ function vCalificaciones(arg) {
 function vCargaNotas(mat) {
   mat = mat || ROLES.docente.materias[0];
   const p = S.periodoCarga ?? REGIMEN.periodoActual;
-  const al = ALUMNOS_CURSO[CURSO_ACT()];
+  const al = ALUMNOS_CURSO["7B"];
   return `<h1 class="titulo-pagina">Carga de calificaciones</h1>
   <div class="toolbar">
     <select onchange="location.hash='#/calificaciones/'+this.value">${ROLES.docente.materias.map((m) => `<option value="${m}" ${m === mat ? "selected" : ""}>${esc(materia(m).nombre)}</option>`).join("")}</select>
-    <select><option>${esc(curso(CURSO_ACT()).nombre)}</option></select>
+    <select><option>${esc(curso("7B").nombre)}</option></select>
     <select onchange="S.periodoCarga=+this.value;render()">${REGIMEN.periodos.map((x, i) => `<option value="${i}" ${i === p ? "selected" : ""}>${x}</option>`).join("")}</select>
     <span class="sep"></span>${S.publicado[p] ? '<span class="chip ok">Publicado a las familias</span>' : '<span class="chip warn">Borrador — no visible a familias</span>'}
   </div>
   <div class="panel"><p class="small muted">La lista de alumnos sale de la inscripción en Búho. Escala: ${REGIMEN.escala}.</p>
   <table><tr><th>Alumno</th>${REGIMEN.periodos.map((x, i) => `<th class="num">${x}</th>`).join("")}<th>Observación</th></tr>
   ${al.map((a) => `<tr><td>${esc(nombre(a))}</td>${REGIMEN.periodos.map((_, i) => i === p ? `<td class="num"><input type="number" min="1" max="10" class="nota-in" style="width:64px" value="${nota(a, mat, i) ?? ""}" onfocus="this.select()" onkeydown="siguienteNota(event,this)" onchange="setNota('${a}','${mat}',${i},this.value)"></td>` : celdaNota(nota(a, mat, i))).join("")}<td><input style="width:100%" placeholder="Opcional"></td></tr>`).join("")}</table>
-  <div class="toolbar" style="margin-top:12px"><span class="small muted" id="estado-carga">${progresoCarga(CURSO_ACT(), mat, p)}% cargado · los cambios se guardan solos · Enter pasa al alumno siguiente</span><span class="sep"></span><button class="primario" onclick="S.publicado[${p}]=true;guardar();render();toast('Notas publicadas: alumnos y familias ya las ven')">Publicar ${REGIMEN.periodos[p]}</button></div></div>`;
+  <div class="toolbar" style="margin-top:12px"><span class="small muted" id="estado-carga">${progresoCarga("7B", mat, p)}% cargado · los cambios se guardan solos · Enter pasa al alumno siguiente</span><span class="sep"></span><button class="primario" onclick="S.publicado[${p}]=true;guardar();render();toast('Notas publicadas: alumnos y familias ya las ven')">Publicar ${REGIMEN.periodos[p]}</button></div></div>`;
 }
 function setNota(a, m, p, v) {
   S.notas[a] = S.notas[a] || {}; S.notas[a][m] = S.notas[a][m] || [null, null, null, null];
   const n = v === "" ? null : Math.max(1, Math.min(10, +v));
   S.notas[a][m][p] = n; guardar();
   const el = $("#estado-carga");
-  if (el) el.innerHTML = `${progresoCarga(CURSO_ACT(), m, p)}% cargado · <b>guardado ✓</b>`;
+  if (el) el.innerHTML = `${progresoCarga("7B", m, p)}% cargado · <b>guardado ✓</b>`;
 }
 // Enter en una nota pasa al alumno siguiente.
 function siguienteNota(e, input) {
@@ -673,7 +673,7 @@ function siguienteNota(e, input) {
   input.blur(); (l[l.indexOf(input) + 1] || input).focus();
 }
 function vNotasSecretaria() {
-  const c = S.cursoSec || CURSO_ACT();
+  const c = S.cursoSec || "7B";
   const p = REGIMEN.periodoActual;
   return `<h1 class="titulo-pagina">Calificaciones y boletines</h1>
   <div class="toolbar"><select onchange="S.cursoSec=this.value;render()">${CURSOS.map((x) => `<option value="${x.id}" ${x.id === c ? "selected" : ""}>${esc(x.nombre)}</option>`).join("")}</select><span class="sep"></span><button onclick="toast('En el producto: genera un PDF con todos los boletines del curso')">{{archivo}} Boletines del curso (PDF)</button></div>
@@ -699,7 +699,7 @@ function eventosVisibles() {
   const cs = cursosVisibles();
   const evs = S.eventos.filter((e) => e.curso === "todos" || cs.includes(e.curso) || e.curso === "personal:" + yo());
   // Las fechas de entrega de las tareas aparecen solas (lección de Classroom).
-  const tareas = S.tareas.filter(() => cs.includes(CURSO_ACT())).map((t) => ({ id: "t" + t.id, titulo: `Entrega: ${t.titulo} (${materia(t.materia).nombre})`, fecha: t.entrega, etiqueta: "Entrega", curso: CURSO_ACT(), auto: true }));
+  const tareas = S.tareas.filter(() => cs.includes("7B")).map((t) => ({ id: "t" + t.id, titulo: `Entrega: ${t.titulo} (${materia(t.materia).nombre})`, fecha: t.entrega, etiqueta: "Entrega", curso: "7B", auto: true }));
   return [...evs, ...tareas];
 }
 function vCalendario() {
@@ -798,3 +798,4 @@ function cambiarRol(r) {
   location.hash = "#/inicio"; render();
 }
 window.addEventListener("hashchange", () => { cerrarModal(); render(); });
+render();

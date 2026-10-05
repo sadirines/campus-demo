@@ -2,30 +2,24 @@
 
 Maqueta navegable del Campus (capa académica sobre Búho Escuela). Sin servidor ni base de datos: todos los datos son ficticios y viven en el navegador.
 
-## Cómo abrirla
-Doble clic en `index.html`. Arriba, en la barra amarilla, se elige el rol (Familia, Alumno, Docente, Secretaría). "Reiniciar datos" vuelve la demo al estado inicial.
+Publicada en https://sadirines.github.io/campus-demo/
 
-## Archivos
-- `index.html` — estructura y pantalla de acceso
-- `css/app.css` — estilos (funcionales; la estética final queda para después)
-- `js/data.js` — datos de prueba (cursos, materias, personas, mensajes, notas, eventos)
-- `js/app.js` — pantallas y lógica de la demo
-- Las capturas de Educativa usadas como referencia tienen datos reales y no se suben al repositorio.
+## Versión 3 (raíz)
+Arma el aula como planificación, según lo que pidieron los usuarios:
 
-## Qué es genérico o está a definir
-Las pantallas lo marcan con un recuadro amarillo "Maqueta":
-- Régimen de calificación (se muestra numérico 1-10 por bimestre) y formato del boletín
-- Tareas con entrega privada: opcional, no incluida en la propuesta económica
-- Política de sesiones (una o varias por usuario)
-- Vistas de Docente y Secretaría: diseñadas sin relevamiento de esos roles
-- Cuotas: representa el módulo que ya existe en Búho
+- **Aula solo para alumnos y docentes.** Cada materia tiene unidades con objetivos, contenidos y, dentro de cada contenido, sus tareas. Una tarea no existe suelta: siempre sale de un contenido.
+- **Secundaria con foros por materia.** En la barra amarilla, "Nivel" cambia entre 7° Grado "B" (primario) y 2° Año "B" (secundario).
+- **Las familias no ven nada del aula:** ni contenidos, ni tareas, ni entregas, ni foros. Ven comunicados, mensajería, calificaciones, calendario institucional, cuotas y avisos de ausencia.
+- **Mis pendientes (alumno) y Entregas por corregir (docente):** listas de todas las materias donde cada tarea lleva a su contenido.
 
-## Opción 2 (con mejoras)
-En `opcion2/index.html`. Es una copia de la maqueta base con funciones agregadas; cada una está marcada en pantalla con la etiqueta "nuevo". Desde la barra amarilla se pasa de una opción a la otra.
+Lo marcado "a confirmar" en pantalla depende de decisiones de la escuela: si las familias ven calificaciones y fechas de evaluación, si la nota de una tarea suma al período, quién abre temas en el foro y de dónde salen los objetivos.
 
-- `opcion2/js/data2.js` — datos extra (3° bimestre publicado, comunicados con tipo, ausencias, plantillas)
-- `opcion2/js/extras.js` — todas las mejoras, separadas del código base
+## Versiones anteriores
+- `opcion1/` — maqueta base.
+- `opcion2/` — base más las mejoras marcadas "nuevo".
 
-Mejoras: resumen "Lo importante de hoy", autorizaciones firmadas en línea, respuesta rápida a comunicados (asisto / no asisto), aviso de ausencia, panel de dirección, alerta temprana de alumnos, gráfico de evolución de notas, plantillas de comunicados, barra inferior tipo app en celular, avatares con iniciales y pantalla de bienvenida.
-
-Las funciones marcadas "nuevo" no están en la propuesta económica actual.
+## Archivos de la versión 3
+- `js/data.js`, `js/data2.js` — datos de prueba de las versiones anteriores
+- `js/data3.js` — unidades, objetivos, contenidos y tareas vinculados, curso de secundaria y foros
+- `js/app.js`, `js/extras.js` — pantallas comunes (heredadas de la opción 2)
+- `js/aula.js` — el aula nueva y las reglas de acceso por rol

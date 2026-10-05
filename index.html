@@ -11,7 +11,7 @@
 
 <!-- Barra de la demo: no forma parte del producto -->
 <div id="demo-bar">
-  <strong>MAQUETA · Opción 1 (base)</strong> <a href="opcion2/index.html">ver Opción 2</a> <span>Datos ficticios · nada se envía ni se guarda en un servidor</span>
+  <strong>MAQUETA · Versión 3</strong> <span>Datos ficticios · nada se envía ni se guarda en un servidor</span>
   <span class="sep"></span>
   <label>Ver como:
     <select id="rol-select" onchange="cambiarRol(this.value)">
@@ -19,6 +19,12 @@
       <option value="alumno">Alumno</option>
       <option value="docente">Docente</option>
       <option value="secretaria">Secretaría / Dirección</option>
+    </select>
+  </label>
+  <label>Nivel:
+    <select id="nivel-select" onchange="cambiarNivel(this.value)">
+      <option value="primario">Primario (7° Grado "B")</option>
+      <option value="secundario">Secundario (2° Año "B")</option>
     </select>
   </label>
   <button onclick="reiniciar()">Reiniciar datos</button>
@@ -54,11 +60,16 @@
     <nav id="menu"></nav>
     <main id="main"></main>
   </div>
-  <footer><span>Campus · Búho Escuela — Ingeniería &amp; Software</span><span>Maqueta funcional · v0.1</span></footer>
+  <nav id="tabbar"></nav>
+  <footer><span>Campus · Búho Escuela — Ingeniería &amp; Software</span><span>Maqueta funcional · versión 3</span></footer>
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/data2.js"></script>
+<script src="js/data3.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/app.js"></script>
+<script src="js/extras.js"></script>
+<script src="js/aula.js"></script>
 </body>
 </html>
