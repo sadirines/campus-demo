@@ -139,5 +139,21 @@ render = function () {
   }
   if (pila.length && $("#modal")) pintarModalRuta();
 };
+// Cada tarjeta del inicio ocupa tantas filas de 8px como su alto: se apilan sin huecos
+// y se mantiene el orden de lectura de izquierda a derecha.
+function acomodarTarjetas() {
+  document.querySelectorAll(".grid.inicio > .panel").forEach((p) => {
+    p.style.gridRowEnd = "span " + Math.ceil((p.getBoundingClientRect().height + 16) / 8);
+  });
+}
+const observador = new ResizeObserver(() => requestAnimationFrame(acomodarTarjetas));
+const _render5 = render;
+render = function () {
+  _render5();
+  observador.disconnect();
+  document.querySelectorAll(".grid.inicio > .panel").forEach((p) => observador.observe(p));
+  acomodarTarjetas();
+};
+window.addEventListener("resize", acomodarTarjetas);
 $("#btn-menu").innerHTML = ic("menu");
 render();

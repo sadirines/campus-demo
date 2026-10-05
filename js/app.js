@@ -211,7 +211,7 @@ function vInicio() {
     h += `<div class="panel"><h3>{{calendario}} Próximas fechas</h3>${listaEventos(proximosEventos(), 6)}</div>`;
     if (r === "alumno") {
       const sig = S.contenidos.find((c) => c.curso === ROLES.alumno.curso && c.obligatorio && !c.vistoPor.includes(yo()));
-      h += `<div class="panel"><h3>{{play}} Retomar</h3>${sig ? `<p>Siguiente contenido pendiente:</p><p><a onclick="location.hash='#/materias/${sig.materia}/${sig.id}'"><b>${esc(sig.titulo)}</b></a><br><span class="small muted">${esc(materia(sig.materia).nombre)} · ${esc(sig.unidad)}</span></p>` : "<p>Estás al día con todos los contenidos.</p>"}</div>`;
+      h += `<div class="panel"><h3>{{play}} Retomar</h3>${sig ? `<p>Siguiente contenido pendiente:</p><p><a onclick="location.hash='#/materias/${sig.materia}/${sig.id}'"><b>${esc(sig.titulo)}</b></a><br><span class="small muted">${esc(materia(sig.materia).nombre)} · ${esc((S.unidades || []).find((u) => u.id === sig.unidad)?.titulo || sig.unidad)}</span></p>` : "<p>Estás al día con todos los contenidos.</p>"}</div>`;
     }
     const ult = REGIMEN.periodos.map((_, i) => i).filter((i) => S.publicado[i]).pop();
     hijos.forEach((a) => { h += `<div class="panel"><h3>{{grafico}} Calificaciones${varios ? " de " + primerNombre(a) : ""} — ${REGIMEN.periodos[ult]}</h3>${tablaMini(a, ult)}<a onclick="${r === "familia" ? `S.hijo='${a}';guardar();` : ""}location.hash='#/calificaciones'">Ver todas →</a></div>`; });
