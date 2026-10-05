@@ -76,6 +76,18 @@ function abrirRuta(h, apilar) {
 const _cerrarModal4 = cerrarModal;
 cerrarModal = function () { pila = []; _cerrarModal4(); };
 
+// Clic en el fondo oscuro cierra la ventana. Solo si el clic empezó y terminó en el fondo,
+// para no cerrarla al seleccionar texto dentro y soltar el mouse afuera.
+const _modal4 = modal;
+modal = function (titulo, html) {
+  _modal4(titulo, html);
+  const fondo = $("#modal");
+  let desdeFondo = false;
+  fondo.addEventListener("mousedown", (e) => { desdeFondo = e.target === fondo; });
+  fondo.addEventListener("click", (e) => { if (desdeFondo && e.target === fondo) cerrarModal(); });
+};
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("#modal")) cerrarModal(); });
+
 // ───────────────────────── 3. volver al inicio ─────────────────────────
 // Cada entrada del historial dentro del recorrido guarda cuántos pasos la separan del inicio.
 let flujoInicio = false, pasos = 0, reemplazando = false;
