@@ -303,3 +303,20 @@ td.desaprobado { color: var(--rojo); font-weight: 700; }
 .origen { background: #f7f9f7; border-left: 3px solid #b9dbb9; padding: 8px 12px; margin-top: 16px; }
 .foro-msg { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eee; }
 .foro-msg .msg-cuerpo { margin-top: 4px; }
+
+/* ───────── Versión 3: menú retráctil, ventanas y volver al inicio ───────── */
+.btn-menu { background: transparent; border: none; color: #fff; padding: 6px; display: grid; place-items: center; }
+.btn-menu:hover { background: rgba(255,255,255,.15); }
+.btn-menu .ic { width: 24px; height: 24px; }
+#menu { transition: width .15s ease; }
+body.menu-chico #menu { width: 68px; padding-left: 10px; padding-right: 6px; }
+body.menu-chico #menu .item { font-size: 0; justify-content: center; position: relative; padding: 10px 0; }
+body.menu-chico #menu .item .chip, body.menu-chico #menu .item:has(input) { display: none; }
+body.menu-chico #menu .item .badge { font-size: 10px; position: absolute; top: 3px; right: 6px; }
+.volver-inicio { margin-bottom: 12px; }
+.modal.ancho { width: min(920px, 100%); }
+.modal .titulo-pagina { font-size: 20px; }
+.modal header { gap: 8px; }
+.modal header b { flex: 1; }
+.modal-atras { background: transparent !important; color: #fff; border: 1px solid rgba(255,255,255,.5) !important; font-size: 15px !important; padding: 2px 10px; }
+@media (max-width: 800px) { .btn-menu { display: none; } }
