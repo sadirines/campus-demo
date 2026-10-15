@@ -15,10 +15,6 @@ Arma el aula como planificación, según lo que pidieron los usuarios:
 
 Lo marcado "a confirmar" en pantalla depende de decisiones de la escuela: si las familias ven calificaciones y fechas de evaluación, si la nota de una tarea suma al período, quién abre temas en el foro y de dónde salen los objetivos.
 
-## Versiones anteriores
-- `opcion1/` — maqueta base.
-- `opcion2/` — base más las mejoras marcadas "nuevo".
-
 ## Archivos de la versión 3
 - `js/data.js`, `js/data2.js` — datos de prueba de las versiones anteriores
 - `js/data3.js` — unidades, objetivos, contenidos y tareas vinculados, curso de secundaria y foros
