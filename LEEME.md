@@ -15,6 +15,20 @@ Arma el aula como planificación, según lo que pidieron los usuarios:
 
 Lo marcado "a confirmar" en pantalla depende de decisiones de la escuela: si las familias ven calificaciones y fechas de evaluación, si la nota de una tarea suma al período, quién abre temas en el foro y de dónde salen los objetivos.
 
+## Versión 5 (`v5/`) — "una cosa a la vez"
+https://sadirines.github.io/campus-demo/v5/
+
+Rediseño completo, pensado primero para el celular:
+
+- **Sin menú lateral:** tres o cuatro pestañas abajo según el rol (Familia: Hoy · Mensajes · Mis hijos; en jardín, Hoy · Mensajes · La sala).
+- **Hoy:** una pila de tarjetas, cada una con su acción (Autorizo, Entregar, Corregir, Pagar). Al resolverla desaparece. Se ven tres a la vez; el resto con "Ver las otras".
+- **Mensajes como chat** y foros como conversación.
+- **Aula:** solo la unidad en curso, como pasos (contenido → tarea). Las otras unidades en una línea.
+- **Secretaría:** enviar un aviso en tres pasos (¿para quién? → ¿qué necesitás? → texto) y seguimiento con una barra por aviso.
+- **Detalles en una hoja** que sube desde abajo y se cierra tocando afuera.
+
+Código propio en `v5/js/app5.js` y `v5/css/app5.css`; reutiliza los datos de prueba de las versiones anteriores.
+
 ## Versión 4 (`v4/`)
 https://sadirines.github.io/campus-demo/v4/
 
