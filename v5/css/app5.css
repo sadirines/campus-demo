@@ -189,3 +189,57 @@ body.en-chat .app { padding-bottom: 96px; }
 
 /* Textos de tarjeta en dos líneas como máximo */
 .card p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ───────── Punto medio: menú lateral en computadora, "Más" en el celular ───────── */
+#lateral { display: none; }
+.espacio { flex: 1; }
+.caja { background: var(--tarjeta); border-radius: var(--radio); padding: 16px 18px; margin-bottom: 12px; }
+.caja h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); }
+.caja .fila-simple { width: 100%; border: none; background: none; text-align: left; border-bottom: 1px solid var(--linea); }
+.caja .fila-simple:last-of-type { border-bottom: none; }
+.grande { font-size: 40px; font-weight: 700; margin: 0; line-height: 1.1; }
+.separa { margin-top: 22px; }
+.plegable summary { cursor: pointer; font-weight: 500; color: var(--marca); }
+.plegable[open] summary { margin-bottom: 10px; }
+.tabla-scroll { overflow-x: auto; margin-bottom: 12px; }
+.tabla { width: 100%; border-collapse: collapse; background: var(--tarjeta); border-radius: 14px; overflow: hidden; }
+.tabla th, .tabla td { padding: 10px; text-align: center; border-bottom: 1px solid var(--linea); font-size: 15px; }
+.tabla th:first-child, .tabla td:first-child { text-align: left; }
+.tabla th { font-size: 13px; color: var(--suave); font-weight: 500; }
+.tabla td.baja { color: var(--aviso); font-weight: 700; }
+.mes-nav { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 12px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-dow { text-align: center; font-size: 12px; color: var(--suave); padding: 4px 0; }
+.cal-dia { background: var(--tarjeta); border-radius: 10px; min-height: 64px; padding: 4px; font-size: 13px; overflow: hidden; }
+.cal-dia.hoy { outline: 2px solid var(--marca); }
+.cal-ev { display: block; width: 100%; border: none; background: var(--marca-suave); color: var(--texto); border-radius: 6px; font-size: 11px; padding: 2px 4px; margin-top: 2px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.item > .pill { flex-shrink: 0; }
+.item .barra { display: block; margin-top: 6px; }
+.hoy-grid { display: block; }
+@media (max-width: 600px) { .cal-ev { font-size: 0; height: 6px; padding: 0; } .cal-dia { min-height: 48px; } }
+
+@media (min-width: 900px) {
+  .marco { display: flex; align-items: flex-start; }
+  #lateral { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; height: 100vh; width: 248px; flex-shrink: 0; padding: 18px 14px; background: var(--tarjeta); border-right: 1px solid var(--linea); overflow-y: auto; }
+  .lat-cab { display: flex; gap: 10px; align-items: center; padding: 0 8px 18px; }
+  .lat-item { display: flex; align-items: center; gap: 12px; width: 100%; border: none; background: none; padding: 11px 12px; border-radius: 12px; text-align: left; font-size: 15px; color: var(--texto); }
+  .lat-item:hover { background: var(--fondo); }
+  .lat-item.activa { background: var(--marca-suave); color: var(--marca); font-weight: 700; }
+  .lat-item .ic { width: 22px; height: 22px; }
+  .lat-item > span:not(.burbuja-n):not(.av) { flex: 1; }
+  .lat-yo { margin-top: auto; }
+  .lat-yo .av { width: 32px; height: 32px; font-size: 12px; }
+  .app { flex: 1; max-width: 1040px; padding: 0 36px 48px; }
+  #pestanas, .solo-movil { display: none !important; }
+  #cabecera { min-height: 24px; padding-top: 18px; }
+  .hoy-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
+  .hoy-grid aside { padding-top: 112px; }
+  .redactar { left: 248px; padding-left: 36px; padding-right: 36px; }
+  body.en-chat .app { padding-bottom: 110px; }
+  .hoja-fondo { align-items: center; }
+  .hoja { border-radius: 22px; max-height: 84vh; transform: translateY(24px); opacity: 0; transition: transform .2s, opacity .2s; }
+  .hoja-fondo.abierta .hoja { opacity: 1; }
+  .agarre { display: none; }
+  .toast { bottom: 32px; }
+}

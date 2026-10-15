@@ -181,17 +181,20 @@ let verTodasHoy = false;
 function primeraOracion(t) { const s = t.split("\n").find((x) => x.trim()) || ""; const o = s.split(/(?<=\.)\s/)[0]; return o.length > 140 ? o.slice(0, 137) + "…" : o; }
 function vHoy() {
   const cards = { familia: hoyFamilia, alumno: hoyAlumno, docente: hoyDocente, secretaria: hoySecretaria }[S.rol]();
-  const n = cards.length;
-  let h = `<h1 class="saludo">Hola, ${primer(yo())}</h1>
+  const n = cards.length, VISIBLES = 4;
+  let izq = `<h1 class="saludo">Hola, ${primer(yo())}</h1>
     <p class="resumen">${n ? `Tenés <b>${n} ${n === 1 ? "cosa" : "cosas"}</b> para hoy.` : "Estás al día. No tenés nada pendiente."}</p>`;
-  const VISIBLES = 3;
-  h += n ? cards.slice(0, VISIBLES).map(tarjeta).join("") : `<div class="vacio">{{check}}<p>Todo listo por hoy.</p></div>`;
-  if (n > VISIBLES) h += verTodasHoy ? cards.slice(VISIBLES).map(tarjeta).join("") : `<button class="btn ancho" onclick="verTodasHoy=true;render()">Ver ${n - VISIBLES === 1 ? "la otra" : `las otras ${n - VISIBLES}`}</button>`;
-  // Debajo, solo lo próximo y un par de accesos.
-  const evs = proximasFechas().slice(0, 3);
-  if (evs.length) h += `<section class="proximo"><h2>Próximamente</h2>${evs.map((e) => `<div class="fila-simple"><span class="fecha-chica">${fDia(e.fecha)}</span><span>${esc(e.titulo)}</span></div>`).join("")}<button class="link" onclick="verFechas()">Ver todas las fechas</button></section>`;
-  if (S.rol === "familia") h += `<div class="atajos"><button class="btn" onclick="avisarAusencia()">{{ausente}} Avisar que falta</button><button class="btn" onclick="verAvisos()">{{megafono}} Avisos del colegio</button></div>`;
-  return h;
+  izq += n ? cards.slice(0, VISIBLES).map(tarjeta).join("") : `<div class="vacio">{{check}}<p>Todo listo por hoy.</p></div>`;
+  if (n > VISIBLES) izq += verTodasHoy ? cards.slice(VISIBLES).map(tarjeta).join("") : `<button class="btn ancho" onclick="verTodasHoy=true;render()">Ver ${n - VISIBLES === 1 ? "la otra" : `las otras ${n - VISIBLES}`}</button>`;
+  // Columna lateral (debajo en el celular): lo próximo y un resumen según el rol.
+  const evs = eventosAgenda().filter((e) => dias(e.fecha) >= 0).slice(0, 4);
+  let der = `<section class="caja"><h2>Próximamente</h2>${evs.map((e) => `<button class="fila-simple" onclick="verEvento('${e.id}')"><span class="fecha-chica">${fDia(e.fecha)}</span><span>${esc(e.titulo)}</span></button>`).join("") || '<p class="sub">No hay fechas próximas.</p>'}<button class="link" onclick="ir('#/agenda')">Ver la agenda</button></section>`;
+  if (S.rol === "familia" && !esJardin()) der += `<section class="caja"><h2>Notas de tus hijos</h2>${hijos().map((a) => { const r = resumenNotas(a); return `<button class="fila-simple" onclick="ir('#/hijos/${a}')"><span class="fecha-chica">${primer(a)}</span><span>${r.prom == null ? "Sin notas" : r.bajas.length ? `Atención en ${esc(r.bajas.map((m) => m.nombre).join(" y "))}` : `Promedio ${fmtNota(r.prom)}`}</span></button>`; }).join("")}</section>`;
+  if (S.rol === "alumno") { const r = resumenNotas(yo()); der += `<section class="caja"><h2>Tus notas</h2><p class="grande">${r.prom == null ? "—" : fmtNota(r.prom)}</p><p class="sub">Promedio del ${REGIMEN.periodos[ultPeriodo()]}</p><button class="link" onclick="ir('#/notas')">Ver todas</button></section>`; }
+  if (S.rol === "docente") der += `<section class="caja"><h2>${esJardin() ? "Tu sala" : "Tus cursos"}</h2>${cursosDocente().flatMap((c) => materiasDocente().map((m) => `<button class="fila-simple" onclick="ir('#/cursos/${c}.${m}')"><span>${esc(m === "sala" ? curso(c).nombre : `${materia(m).nombre} · ${curso(c).nombre}`)}</span></button>`)).join("")}</section>`;
+  if (S.rol === "secretaria") der += `<section class="caja"><h2>De un vistazo</h2>${indicadores().map(([v, t]) => `<div class="fila-simple"><span class="fecha-chica"><b>${v}</b></span><span>${t}</span></div>`).join("")}<button class="link" onclick="ir('#/panel')">Abrir el panel</button></section>`;
+  if (S.rol === "familia") der += `<div class="atajos"><button class="btn" onclick="avisarAusencia()">{{ausente}} Avisar que falta</button></div>`;
+  return `<div class="hoy-grid"><div>${izq}</div><aside>${der}</aside></div>`;
 }
 function proximasFechas() {
   const cs = misCursos();
@@ -286,6 +289,7 @@ function nombreHilo(k) {
 function vMensajes() {
   const hs = hilos();
   return `<div class="titulo-fila"><h1>Mensajes</h1><button class="btn pri" onclick="nuevoChat()">{{lapiz}} Nuevo</button></div>
+    ${hs.length > 4 ? `<input class="buscar" placeholder="Buscar en mensajes" oninput="const q=this.value.toLowerCase();document.querySelectorAll('.hilo').forEach(b=>b.style.display=b.textContent.toLowerCase().includes(q)?'':'none')">` : ""}
     ${hs.map((h) => `<button class="hilo ${h.nuevos ? "nuevo" : ""}" onclick="ir('#/mensajes/${encodeURIComponent(h.k)}')">${h.k.startsWith("g:") ? '<span class="av grupo">{{usuario}}</span>' : avatar(h.k)}
       <span class="hilo-texto"><b>${esc(nombreHilo(h.k))}</b><small>${h.ult.de === yo() ? "Vos: " : ""}${esc((h.ult.asunto ? h.ult.asunto + " — " : "") + h.ult.cuerpo).slice(0, 70)}</small></span>
       <span class="hilo-lado"><small>${fDia(h.ult.fecha)}</small>${h.nuevos ? `<span class="burbuja-n">${h.nuevos}</span>` : ""}</span></button>`).join("") || `<div class="vacio">{{sobre}}<p>Todavía no tenés mensajes.</p></div>`}`;
@@ -360,6 +364,7 @@ function vHijo(a) {
   const p = ultPeriodo(), c = cursoDe(a), ms = materiasDeCurso(c);
   return `<h1>${esc(nombre(a))}</h1><p class="sub">${esc(curso(c).nombre)} · notas del ${REGIMEN.periodos[p]}</p>
     <div class="mosaico">${ms.map((m) => { const n = nota(a, m.id, p), ant = nota(a, m.id, p - 1); const fl = n == null || ant == null ? "" : n > ant ? "↑" : n < ant ? "↓" : ""; return `<div class="tesela ${n != null && n < REGIMEN.aprobacion ? "baja" : ""}"><span class="num">${n ?? "—"}<small>${fl}</small></span><span class="mat">${esc(m.nombre)}</span></div>`; }).join("")}</div>
+    <details class="caja plegable"><summary>Ver todos los bimestres</summary>${tablaNotas(a)}</details>
     <div class="atajos"><button class="btn" onclick="toast('En el producto descarga el boletín en PDF')">{{archivo}} Boletín</button><button class="btn" onclick="ir('#/mensajes/${materiasDeCurso(c)[0]?.docente || "s1"}')">{{lapiz}} Escribir a la docente</button></div>`;
 }
 function vSala(id) {
@@ -390,12 +395,13 @@ function vMateria(mat, c) {
       ${ts.map((t) => { const e = estadoTarea(t, me); return `<button class="subpaso" onclick="verTarea(${t.id})">{{tarea}} <span>${esc(t.titulo)}<small>${doc ? `${Object.keys(t.entregas).length} de ${total} entregaron` : `Vence ${cuando(t.entrega)}`}</small></span>${doc ? "" : `<span class="pill ${e.k === "pendiente" || e.k === "vencida" ? "aviso" : "ok"}">${e.txt}</span>`}</button>`; }).join("")}</li>`;
   }).join("");
   const foros = S.foros.filter((f) => f.materia === mat && f.curso === c);
-  return `<h1>${esc(materia(mat).nombre)}</h1><p class="sub">${esc(nombre(materia(mat).docente))} · ${esc(curso(c).nombre)}</p>
+  const p = !doc ? avanceMateria(me, mat, c) : null;
+  return `<div class="titulo-fila"><h1>${esc(materia(mat).nombre)}</h1>${doc ? `<button class="btn" onclick="nuevaUnidad('${mat}','${c}')">{{mas}} Nueva unidad</button>` : ""}</div><p class="sub">${esc(nombre(materia(mat).docente))} · ${esc(curso(c).nombre)}${p != null ? ` · ${p}% de la unidad hecho` : ""}</p>
     ${act ? `<section class="unidad-actual"><p class="etiqueta">Ahora</p><h2>${esc(act.titulo)}</h2><p class="sub">Hasta el ${fDia(act.hasta)} · <button class="link" onclick="verObjetivos(${act.id})">¿Qué vamos a aprender?</button></p><ol class="pasos">${pasos(act) || '<li class="vacio-chico">Todavía no hay contenidos.</li>'}</ol>
       ${doc ? `<button class="btn" onclick="nuevoContenido(${act.id})">{{mas}} Agregar contenido</button>` : ""}</section>` : `<p>Todavía no hay unidades.</p>`}
     ${us.filter((u) => u !== act).map((u) => `<button class="otra-unidad" onclick="verUnidad(${u.id})"><span>${esc(u.titulo)}</span><small>${u.hasta < HOY ? "Terminada" : "Empieza el " + fDia(u.desde)}</small></button>`).join("")}
     ${curso(c).nivel === "Secundario" ? `<button class="card materia" onclick="ir('${doc ? `#/cursos/${c}.${mat}/foro` : `#/materias/${mat}/foro`}')"><span class="materia-texto"><b>{{foro}} Foro de la materia</b><small>${foros.length} tema(s)</small></span>{{chevron}}</button>` : ""}
-    ${doc ? `<button class="card materia" onclick="cargarNotas('${mat}')"><span class="materia-texto"><b>{{grafico}} Notas del ${REGIMEN.periodos[S.publicado.indexOf(false)]}</b><small>Cargar o revisar</small></span>{{chevron}}</button>` : ""}`;
+    ${doc ? `<button class="card materia" onclick="ir('#/notas/${mat}')"><span class="materia-texto"><b>{{grafico}} Notas de ${esc(materia(mat).nombre)}</b><small>Planilla del curso</small></span>{{chevron}}</button>` : ""}`;
 }
 function verObjetivos(uid) { const u = S.unidades.find((x) => x.id === uid); hoja(esc(u.titulo), `<p class="pregunta">Al terminar la unidad vas a poder:</p><ul class="lista">${u.objetivos.map((o) => `<li>${esc(o)}</li>`).join("")}</ul>`); }
 function verUnidad(uid) {
@@ -550,23 +556,168 @@ function vSeguimiento(id) {
   return `<h1>Seguimiento</h1><p class="sub">Avisos que esperan respuesta</p>${l.map((c) => { const fs = familiasDe(c.alcance), n = fs.filter((f) => c.respuestas[f]).length; return `<button class="card seg" onclick="ir('#/seguimiento/${c.id}')"><b>${esc(c.titulo)}</b><div class="barra"><div style="width:${fs.length ? (n / fs.length) * 100 : 0}%"></div></div><small>${n} de ${fs.length} respondieron</small></button>`; }).join("")}`;
 }
 
-// ───────────────────────── navegación ─────────────────────────
-function pestanas() {
-  if (S.rol === "familia") return esJardin() ? [["hoy", "Hoy", "inicio"], ["mensajes", "Mensajes", "sobre"], ["sala", "La sala", "foro"]] : [["hoy", "Hoy", "inicio"], ["mensajes", "Mensajes", "sobre"], ["hijos", "Mis hijos", "usuario"]];
-  if (S.rol === "alumno") return [["hoy", "Hoy", "inicio"], ["materias", "Materias", "libro"], ["mensajes", "Mensajes", "sobre"]];
-  if (S.rol === "docente") return [["hoy", "Hoy", "inicio"], ["cursos", esJardin() ? "Mi sala" : "Mis cursos", "libro"], ["mensajes", "Mensajes", "sobre"]];
-  return [["hoy", "Hoy", "inicio"], ["enviar", "Enviar aviso", "megafono"], ["seguimiento", "Seguimiento", "grafico"], ["mensajes", "Mensajes", "sobre"]];
+// ───────────────────────── secciones que vuelven (punto medio) ─────────────────────────
+function avanceMateria(a, mat, c) {
+  const conts = S.contenidos.filter((x) => x.materia === mat && x.curso === c && x.obligatorio && S.unidades.find((u) => u.id === x.unidad) === unidadActual(unidadesDe(mat, c)));
+  const tars = S.tareas.filter((t) => t.materia === mat && t.curso === c && conts.some((x) => x.id === t.contenido));
+  const total = conts.length + tars.length;
+  return total ? Math.round(((conts.filter((x) => x.vistoPor.includes(a)).length + tars.filter((t) => t.entregas[a]).length) / total) * 100) : null;
 }
+function vMas() {
+  const resto = secciones().slice(4);
+  return `<h1>Más</h1>${resto.map(([k, t, i]) => `<button class="item" onclick="ir('#/${k}')"><span class="av grupo">{{${i}}}</span><span><b>${t}</b></span>{{chevron}}</button>`).join("")}
+    <button class="item" onclick="verPerfil()">${avatar(yo())}<span><b>Mi perfil</b><small>${esc(nombre(yo()))}</small></span>{{chevron}}</button>`;
+}
+
+// Avisos del colegio (todos los roles).
+function avisosVisibles() { return S.comunicados.filter((c) => S.rol === "secretaria" || coincide(c.alcance, misCursos())).sort((a, b) => b.fecha.localeCompare(a.fecha)); }
+function vAvisos() {
+  const filtro = S.filtroAvisos || "todos";
+  const me = yo();
+  const estado = (c) => (c.tipo === "info" ? ["Informativo", ""] : S.rol !== "familia" ? [`${Object.keys(c.respuestas).length} de ${familiasDe(c.alcance).length} respondieron`, ""] : c.respuestas[me] ? [`Respondiste: ${c.respuestas[me].r}`, "ok"] : ["Falta responder", "aviso"]);
+  let l = avisosVisibles();
+  if (filtro === "pendientes") l = l.filter((c) => c.tipo !== "info" && !c.respuestas[me]);
+  return `<h1>Avisos del colegio</h1>
+    ${S.rol === "familia" ? `<div class="chips"><button class="chip-op ${filtro === "todos" ? "sel" : ""}" onclick="S.filtroAvisos='todos';render()">Todos</button><button class="chip-op ${filtro === "pendientes" ? "sel" : ""}" onclick="S.filtroAvisos='pendientes';render()">Por responder</button></div>` : ""}
+    ${l.map((c) => { const [t, k] = estado(c); return `<button class="item" onclick="verComunicado(${c.id})">${avatar(c.de)}<span><b>${esc(c.titulo)}</b><small>${esc(nombre(c.de))} · ${fDia(c.fecha)} · para ${esc(c.alcance)}</small></span><span class="pill ${k}">${esc(t)}</span></button>`; }).join("") || '<div class="vacio">{{megafono}}<p>No hay avisos.</p></div>'}`;
+}
+
+// Agenda: lista por defecto y vista de mes.
+function eventosAgenda() {
+  const cs = misCursos(), aula = ["Examen", "Entrega", "Tarea", "Clase"];
+  let evs = S.eventos.filter((e) => e.curso === "todos" || cs.includes(e.curso));
+  if (S.rol === "familia") evs = evs.filter((e) => !aula.includes(e.etiqueta));
+  if (S.rol === "alumno" || S.rol === "docente") evs = evs.concat(S.tareas.filter((t) => cs.includes(t.curso) && (S.rol === "alumno" || materiasDocente().includes(t.materia))).map((t) => ({ id: "t" + t.id, titulo: `Entrega: ${t.titulo}`, fecha: t.entrega, etiqueta: "Entrega", curso: t.curso })));
+  return evs.sort((a, b) => a.fecha.localeCompare(b.fecha));
+}
+function verEvento(id) {
+  const e = eventosAgenda().find((x) => String(x.id) === String(id));
+  if (!e) return;
+  const d = fecha(e.fecha);
+  hoja(esc(e.titulo), `<p class="pill">${esc(e.etiqueta)}</p><p class="texto"><b>${["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}</b> · ${cuando(e.fecha)}</p><p class="sub">Para ${e.curso === "todos" ? "todo el colegio" : esc(curso(e.curso).nombre)}</p>
+    ${String(e.id).startsWith("t") ? `<button class="btn pri" onclick="verTarea(${String(e.id).slice(1)})">Ver la tarea</button>` : ""}`);
+}
+function vAgenda() {
+  const mes = S.mesAgenda || HOY.slice(0, 7), vista = S.vistaAgenda || "lista";
+  const [y, m] = mes.split("-").map(Number);
+  const evs = eventosAgenda().filter((e) => e.fecha.startsWith(mes));
+  const mover = (d) => { const n = new Date(y, m - 1 + d, 1); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`; };
+  let cuerpo;
+  if (vista === "mes") {
+    const primero = new Date(y, m - 1, 1).getDay(), total = new Date(y, m, 0).getDate();
+    let celdas = DIAS.map((d) => `<div class="cal-dow">${d}</div>`).join("") + "<div></div>".repeat(primero);
+    for (let d = 1; d <= total; d++) {
+      const f = `${mes}-${String(d).padStart(2, "0")}`, del = evs.filter((e) => e.fecha === f);
+      celdas += `<div class="cal-dia ${f === HOY ? "hoy" : ""}"><span>${d}</span>${del.map((e) => `<button class="cal-ev" onclick="verEvento('${e.id}')" title="${esc(e.titulo)}">${esc(e.titulo)}</button>`).join("")}</div>`;
+    }
+    cuerpo = `<div class="cal">${celdas}</div>`;
+  } else {
+    cuerpo = evs.map((e) => `<button class="item" onclick="verEvento('${e.id}')"><span class="fecha-chica">${fDia(e.fecha)}</span><span><b>${esc(e.titulo)}</b><small>${esc(e.etiqueta)}</small></span>{{chevron}}</button>`).join("") || '<p class="sub">No hay fechas este mes.</p>';
+  }
+  return `<div class="titulo-fila"><h1>Agenda</h1><div class="chips"><button class="chip-op ${vista === "lista" ? "sel" : ""}" onclick="S.vistaAgenda='lista';render()">Lista</button><button class="chip-op ${vista === "mes" ? "sel" : ""}" onclick="S.vistaAgenda='mes';render()">Mes</button></div></div>
+    <div class="mes-nav"><button class="icono" onclick="S.mesAgenda='${mover(-1)}';render()">{{izq}}</button><b>${MESES[m - 1][0].toUpperCase() + MESES[m - 1].slice(1)} ${y}</b><button class="icono" onclick="S.mesAgenda='${mover(1)}';render()">{{der}}</button></div>${cuerpo}`;
+}
+
+// Cuotas (módulo existente de Búho).
+function vCuotas() {
+  const pagada = !!S.cuotas[yo()];
+  const filas = [["Octubre 2026", "10/10/26", pagada], ["Septiembre 2026", "10/09/26", true], ["Agosto 2026", "10/08/26", true], ["Julio 2026", "10/07/26", true]];
+  return `<h1>Cuotas</h1><p class="sub">${hijos().map((h) => primer(h)).join(", ")} · se paga desde Búho con MercadoPago</p>
+    ${filas.map(([mes, vence, ok], i) => `<div class="item"><span class="av grupo">{{tarjeta}}</span><span><b>${mes}</b><small>Vence ${vence}</small></span>${ok ? '<span class="pill ok">Pagada</span>' : `<button class="btn pri" onclick="pagarCuota();render()">Pagar</button>`}</div>`).join("")}`;
+}
+
+// Notas: alumno (las propias), docente (planilla por materia).
+function tablaNotas(a) {
+  const ms = materiasDeCurso(cursoDe(a));
+  return `<div class="tabla-scroll"><table class="tabla"><tr><th>Materia</th>${REGIMEN.periodos.map((p) => `<th>${p.replace(" Bimestre", "°").replace("°°", "°")}</th>`).join("")}<th>Prom.</th></tr>
+    ${ms.map((m) => { const v = REGIMEN.periodos.map((_, i) => (S.publicado[i] ? nota(a, m.id, i) : null)); const ok = v.filter((x) => x != null); return `<tr><td>${esc(m.nombre)}</td>${v.map((x) => `<td class="${x != null && x < REGIMEN.aprobacion ? "baja" : ""}">${x ?? "—"}</td>`).join("")}<td><b>${ok.length ? fmtNota(Math.round((ok.reduce((s, x) => s + x, 0) / ok.length) * 10) / 10) : "—"}</b></td></tr>`; }).join("")}</table></div>`;
+}
+function vNotas(mat) {
+  if (S.rol === "alumno") {
+    const me = yo(), p = ultPeriodo(), ms = materiasDeCurso(cursoAlumno());
+    return `<h1>Mis notas</h1><p class="sub">${REGIMEN.periodos[p]}</p><div class="mosaico">${ms.map((m) => { const n = nota(me, m.id, p); return `<div class="tesela ${n != null && n < REGIMEN.aprobacion ? "baja" : ""}"><span class="num">${n ?? "—"}</span><span class="mat">${esc(m.nombre)}</span></div>`; }).join("")}</div>
+      <h2 class="separa">Todos los bimestres</h2>${tablaNotas(me)}<div class="atajos"><button class="btn" onclick="toast('En el producto descarga el boletín en PDF')">{{archivo}} Boletín</button></div>`;
+  }
+  const c = cursosDocente()[0], ms = materiasDocente(), m = mat && ms.includes(mat) ? mat : ms[0], p = S.publicado.indexOf(false);
+  return `<h1>Notas</h1><div class="chips">${ms.map((x) => `<button class="chip-op ${x === m ? "sel" : ""}" onclick="ir('#/notas/${x}')">${esc(materia(x).nombre)}</button>`).join("")}</div>
+    <p class="sub">${esc(curso(c).nombre)} · se carga el ${REGIMEN.periodos[p]} · los cambios se guardan solos</p>
+    <div class="tabla-scroll"><table class="tabla"><tr><th>Alumno</th>${REGIMEN.periodos.map((x, i) => `<th>${i + 1}°</th>`).join("")}</tr>
+    ${ALUMNOS_CURSO[c].map((a) => `<tr><td>${esc(nombre(a))}</td>${REGIMEN.periodos.map((_, i) => i === p ? `<td><input class="nota-in" type="number" min="1" max="10" value="${nota(a, m, i) ?? ""}" onfocus="this.select()" onchange="ponerNota('${a}','${m}',${i},this.value)" onkeydown="if(event.key==='Enter'){const l=[...document.querySelectorAll('.nota-in')];(l[l.indexOf(this)+1]||this).focus()}"></td>` : `<td class="${nota(a, m, i) != null && nota(a, m, i) < REGIMEN.aprobacion ? "baja" : ""}">${nota(a, m, i) ?? "—"}</td>`).join("")}</tr>`).join("")}</table></div>
+    <button class="btn pri" onclick="toast('Notas publicadas: alumnos y familias ya las ven')">Publicar ${REGIMEN.periodos[p]}</button>`;
+}
+
+// Pendientes del alumno (todas las materias) y entregas por corregir del docente.
+function vPendientes() {
+  const me = yo(), ts = S.tareas.filter((t) => t.curso === cursoAlumno()).sort((a, b) => a.entrega.localeCompare(b.entrega));
+  const grupo = (titulo, ks) => { const l = ts.filter((t) => ks.includes(estadoTarea(t, me).k)); return l.length ? `<h2 class="separa">${titulo} (${l.length})</h2>${l.map((t) => `<button class="item" onclick="verTarea(${t.id})"><span class="fecha-chica">${fDia(t.entrega)}</span><span><b>${esc(t.titulo)}</b><small>${esc(materia(t.materia).nombre)} · ${esc(contenido(t.contenido).titulo)}</small></span><span class="pill ${ks.includes("pendiente") || ks.includes("vencida") ? "aviso" : "ok"}">${estadoTarea(t, me).txt}</span></button>`).join("")}` : ""; };
+  return `<h1>Pendientes</h1><p class="sub">Las tareas de todas tus materias</p>${grupo("Para entregar", ["pendiente"])}${grupo("Vencidas", ["vencida"])}${grupo("Entregadas", ["entregada", "corregida"])}`;
+}
+function vCorregir() {
+  const cs = cursosDocente();
+  const filas = S.tareas.filter((t) => materiasDocente().includes(t.materia) && cs.includes(t.curso)).flatMap((t) => Object.entries(t.entregas).filter(([, e]) => e.nota == null).map(([a]) => ({ t, a })));
+  return `<h1>Por corregir</h1><p class="sub">${filas.length ? `${filas.length} entrega(s) esperando tu corrección` : "No tenés entregas pendientes."}</p>
+    ${filas.map(({ t, a }) => `<div class="item">${avatar(a)}<span><b>${esc(nombre(a))}</b><small>${esc(t.titulo)} · ${esc(materia(t.materia).nombre)}</small></span><button class="btn pri" onclick="corregir(${t.id},'${a}')">Corregir</button></div>`).join("")}`;
+}
+function nuevaUnidad(mat, c) {
+  hoja("Nueva unidad", `<input id="nu-tit" class="campo" placeholder="Título (ej. Unidad 4: …)"><p class="pregunta">¿Cuándo?</p><div class="dos"><input id="nu-desde" class="campo" type="date" value="${HOY}"><input id="nu-hasta" class="campo" type="date" value="${HOY}"></div>
+    <p class="pregunta">¿Qué van a aprender? (un objetivo por renglón)</p><textarea id="nu-obj" class="campo" rows="4"></textarea><button class="btn pri ancho" onclick="guardarUnidad('${mat}','${c}')">Crear unidad</button>`);
+}
+function guardarUnidad(mat, c) {
+  const t = $("#nu-tit").value.trim(), obj = $("#nu-obj").value.split("\n").map((x) => x.trim()).filter(Boolean);
+  if (!t || !obj.length) return toast("Completá el título y al menos un objetivo");
+  S.unidades.push({ id: Date.now(), curso: c, materia: mat, orden: Math.max(0, ...unidadesDe(mat, c).map((u) => u.orden)) + 1, titulo: t, desde: $("#nu-desde").value, hasta: $("#nu-hasta").value, objetivos: obj });
+  guardar(); cerrarHoja(); render(); toast("Unidad creada");
+}
+
+// Secretaría: panel y calificaciones por curso.
+function indicadores() {
+  const coms = S.comunicados.filter((c) => c.tipo !== "info");
+  const esperadas = coms.reduce((s, c) => s + familiasDe(c.alcance).length, 0), resp = coms.reduce((s, c) => s + familiasDe(c.alcance).filter((f) => c.respuestas[f]).length, 0);
+  const p = S.publicado.indexOf(false);
+  const celdas = CURSOS.flatMap((c) => materiasDeCurso(c.id).flatMap((m) => ALUMNOS_CURSO[c.id].map((a) => nota(a, m.id, p) != null)));
+  return [[`${esperadas ? Math.round((resp / esperadas) * 100) : 0}%`, "respuesta a los avisos"], [`${celdas.length ? Math.round((celdas.filter(Boolean).length / celdas.length) * 100) : 0}%`, `notas del ${REGIMEN.periodos[p]} cargadas`], [CURSOS.flatMap((c) => riesgo(c.id)).length, "alumnos necesitan atención"], [S.ausencias.filter((x) => x.desde <= HOY && x.hasta >= HOY).length, "ausencias avisadas hoy"]];
+}
+function vPanel() {
+  const p = S.publicado.indexOf(false);
+  return `<h1>Panel</h1><div class="mosaico">${indicadores().map(([v, t]) => `<div class="tesela"><span class="num">${v}</span><span class="mat">${t}</span></div>`).join("")}</div>
+    <h2 class="separa">Notas del ${REGIMEN.periodos[p]} por curso</h2>${CURSOS.filter((c) => materiasDeCurso(c.id).length).map((c) => { const ms = materiasDeCurso(c.id), celdas = ms.flatMap((m) => ALUMNOS_CURSO[c.id].map((a) => nota(a, m.id, p) != null)), x = Math.round((celdas.filter(Boolean).length / celdas.length) * 100); return `<button class="card seg" onclick="ir('#/boletines/${c.id}')"><b>${esc(c.nombre)}</b><div class="barra"><div style="width:${x}%"></div></div><small>${x}% cargado</small></button>`; }).join("")}
+    <h2 class="separa">Necesitan atención</h2>${CURSOS.flatMap((c) => riesgo(c.id)).map((r) => `<div class="item">${avatar(r.a)}<span><b>${esc(nombre(r.a))}</b><small>${esc(curso(cursoDe(r.a)).nombre)} · ${esc(r.motivos.join(". "))}</small></span><button class="btn" onclick="ir('#/mensajes/${familiaDe(r.a)}')">Escribir</button></div>`).join("") || '<p class="sub">Nadie por ahora.</p>'}`;
+}
+function vBoletines(cid) {
+  const cs = CURSOS.filter((c) => materiasDeCurso(c.id).length), c = cs.find((x) => x.id === cid) || cs[0], p = S.publicado.indexOf(false);
+  return `<h1>Calificaciones</h1><div class="chips">${cs.map((x) => `<button class="chip-op ${x.id === c.id ? "sel" : ""}" onclick="ir('#/boletines/${x.id}')">${esc(x.nombre)}</button>`).join("")}</div>
+    <h2 class="separa">Carga del ${REGIMEN.periodos[p]}</h2>${materiasDeCurso(c.id).map((m) => { const x = Math.round((ALUMNOS_CURSO[c.id].filter((a) => nota(a, m.id, p) != null).length / ALUMNOS_CURSO[c.id].length) * 100); return `<div class="item"><span><b>${esc(m.nombre)}</b><small>${esc(nombre(m.docente))}</small><span class="barra"><span style="display:block;height:100%;width:${x}%;background:var(--ok)"></span></span></span>${x < 100 ? `<button class="btn" onclick="toast('Recordatorio enviado a ${esc(nombre(m.docente))}')">Recordar</button>` : '<span class="pill ok">Completa</span>'}</div>`; }).join("")}
+    <h2 class="separa">Alumnos</h2>${ALUMNOS_CURSO[c.id].map((a) => { const r = resumenNotas(a); return `<div class="item">${avatar(a)}<span><b>${esc(nombre(a))}</b><small>Promedio ${r.prom == null ? "—" : fmtNota(r.prom)}</small></span><button class="btn" onclick="toast('En el producto descarga el boletín en PDF')">Boletín</button></div>`; }).join("")}`;
+}
+
+// ───────────────────────── navegación ─────────────────────────
+// Todas las secciones de cada rol: en computadora van en el menú lateral; en el celular,
+// las primeras cuatro como pestañas y el resto en "Más".
+function secciones() {
+  const j = esJardin();
+  if (S.rol === "familia") return [["hoy", "Hoy", "inicio"], ["mensajes", "Mensajes", "sobre"], j ? ["sala", "La sala", "foro"] : ["hijos", "Mis hijos", "usuario"], ["avisos", "Avisos del colegio", "megafono"], ["agenda", "Agenda", "calendario"], ["cuotas", "Cuotas", "tarjeta"]];
+  if (S.rol === "alumno") return [["hoy", "Hoy", "inicio"], ["materias", "Materias", "libro"], ["pendientes", "Pendientes", "tarea"], ["mensajes", "Mensajes", "sobre"], ["notas", "Mis notas", "grafico"], ["agenda", "Agenda", "calendario"], ["avisos", "Avisos del colegio", "megafono"]];
+  if (S.rol === "docente") return [["hoy", "Hoy", "inicio"], ["cursos", j ? "Mi sala" : "Mis cursos", "libro"], ["mensajes", "Mensajes", "sobre"], ...(j ? [] : [["corregir", "Por corregir", "tarea"], ["notas", "Notas", "grafico"]]), ["agenda", "Agenda", "calendario"], ["avisos", "Avisos del colegio", "megafono"]];
+  return [["hoy", "Hoy", "inicio"], ["enviar", "Enviar aviso", "lapiz"], ["seguimiento", "Seguimiento", "megafono"], ["mensajes", "Mensajes", "sobre"], ["panel", "Panel", "grafico"], ["boletines", "Calificaciones", "archivo"], ["agenda", "Agenda", "calendario"]];
+}
+// En las pestañas del celular, nombres cortos.
+const CORTOS = { "Avisos del colegio": "Avisos", "Por corregir": "Corregir", "Enviar aviso": "Enviar" };
+function pestanas() { const s = secciones().map(([k, t, i]) => [k, CORTOS[t] || t, i]); return s.length > 4 ? [...s.slice(0, 4), ["mas", "Más", "puntos"]] : s; }
 function ir(h) { location.hash = h; }
 function ruta() { return (location.hash.replace(/^#\/?/, "") || "hoy").split("/").map(decodeURIComponent); }
-function render(soloPestanas) {
+function render() {
   $("#rol-select").value = S.rol; $("#nivel-select").value = S.nivel;
   $("#rol-select option[value=alumno]").disabled = esJardin();
   const [sec, a, b, c] = ruta();
-  const tabs = pestanas();
+  const todas = secciones();
   const nuevos = noLeidosDe(yo()).length;
-  $("#pestanas").innerHTML = iconizar(tabs.map(([k, t, i]) => `<button class="${sec === k ? "activa" : ""}" onclick="ir('#/${k}')">{{${i}}}${k === "mensajes" && nuevos ? `<span class="burbuja-n">${nuevos}</span>` : ""}<span>${t}</span></button>`).join(""));
-  if (soloPestanas) return;
+  const pendCom = S.rol === "familia" ? S.comunicados.filter((x) => x.tipo !== "info" && coincide(x.alcance, misCursos()) && !x.respuestas[yo()]).length : 0;
+  const contador = (k) => (k === "mensajes" && nuevos ? `<span class="burbuja-n">${nuevos}</span>` : k === "avisos" && pendCom ? `<span class="burbuja-n">${pendCom}</span>` : "");
+  const enMas = !pestanas().some(([k]) => k === sec) && todas.some(([k]) => k === sec);
+  $("#pestanas").innerHTML = iconizar(pestanas().map(([k, t, i]) => `<button class="${sec === k || (k === "mas" && enMas) ? "activa" : ""}" onclick="ir('#/${k}')">{{${i}}}${contador(k)}<span>${t}</span></button>`).join(""));
+  $("#lateral").innerHTML = iconizar(`<div class="lat-cab"><span class="logo">JH</span><span class="cab-titulo">Campus<small>${esc(COLEGIO.nombre)}</small></span></div>
+    ${todas.map(([k, t, i]) => `<button class="lat-item ${sec === k ? "activa" : ""}" onclick="ir('#/${k}')">{{${i}}}<span>${t}</span>${contador(k)}</button>`).join("")}
+    <button class="lat-item lat-yo" onclick="verPerfil()">${avatar(yo())}<span>${esc(nombre(yo()))}</span></button>`);
   const vistas = {
     hoy: () => vHoy(),
     mensajes: () => (a ? vChat(a) : vMensajes()),
@@ -576,14 +727,22 @@ function render(soloPestanas) {
     cursos: () => (a ? vCurso(a, b, c) : vCursos()),
     enviar: () => vEnviar(),
     seguimiento: () => vSeguimiento(a),
+    avisos: () => vAvisos(),
+    agenda: () => vAgenda(),
+    cuotas: () => vCuotas(),
+    notas: () => vNotas(a),
+    pendientes: () => vPendientes(),
+    corregir: () => vCorregir(),
+    panel: () => vPanel(),
+    boletines: () => vBoletines(a),
+    mas: () => vMas(),
   };
-  const permitida = tabs.some(([k]) => k === sec);
-  // Cabecera: atrás si estás dentro de algo; si no, el colegio y tu avatar.
-  const dentro = permitida && a;
+  const permitida = sec === "mas" || todas.some(([k]) => k === sec);
+  const dentro = permitida && a && sec !== "notas" && sec !== "boletines";
   const titulo = sec === "mensajes" && a ? esc(nombreHilo(a)) : "";
   $("#cabecera").innerHTML = iconizar(dentro
     ? `<button class="atras" onclick="history.length > 1 ? history.back() : ir('#/${sec}')">{{izq}}</button><span class="cab-titulo">${titulo}</span>`
-    : `<span class="logo">JH</span><span class="cab-titulo">Campus<small>${esc(COLEGIO.nombre)}</small></span><button class="yo" onclick="verPerfil()">${avatar(yo())}</button>`);
+    : `<span class="logo solo-movil">JH</span><span class="cab-titulo solo-movil">Campus<small>${esc(COLEGIO.nombre)}</small></span><span class="espacio"></span><button class="yo solo-movil" onclick="verPerfil()">${avatar(yo())}</button>`);
   $("#pantalla").innerHTML = iconizar(permitida ? vistas[sec]() : vHoy());
   document.body.classList.toggle("en-chat", !!$("#pantalla .redactar"));
 }

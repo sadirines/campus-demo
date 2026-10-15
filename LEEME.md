@@ -20,8 +20,9 @@ https://sadirines.github.io/campus-demo/v5/
 
 Rediseño completo, pensado primero para el celular:
 
-- **Sin menú lateral:** tres o cuatro pestañas abajo según el rol (Familia: Hoy · Mensajes · Mis hijos; en jardín, Hoy · Mensajes · La sala).
-- **Hoy:** una pila de tarjetas, cada una con su acción (Autorizo, Entregar, Corregir, Pagar). Al resolverla desaparece. Se ven tres a la vez; el resto con "Ver las otras".
+- **Navegación:** en computadora, menú lateral con todas las secciones; en el celular, cuatro pestañas abajo y el resto en "Más".
+- **Hoy:** una pila de tarjetas, cada una con su acción (Autorizo, Entregar, Corregir, Pagar). Al resolverla desaparece. Se ven cuatro a la vez; en computadora, al costado, próximas fechas y un resumen según el rol.
+- **Secciones completas:** Avisos del colegio, Agenda (lista y mes), Cuotas, Mis notas y Pendientes (alumno), Por corregir y Notas (docente), Panel y Calificaciones (secretaría).
 - **Mensajes como chat** y foros como conversación.
 - **Aula:** solo la unidad en curso, como pasos (contenido → tarea). Las otras unidades en una línea.
 - **Secretaría:** enviar un aviso en tres pasos (¿para quién? → ¿qué necesitás? → texto) y seguimiento con una barra por aviso.
