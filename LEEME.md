@@ -15,6 +15,19 @@ Arma el aula como planificación, según lo que pidieron los usuarios:
 
 Lo marcado "a confirmar" en pantalla depende de decisiones de la escuela: si las familias ven calificaciones y fechas de evaluación, si la nota de una tarea suma al período, quién abre temas en el foro y de dónde salen los objetivos.
 
+## Versión 4 (`v4/`)
+https://sadirines.github.io/campus-demo/v4/
+
+Misma base que la versión 3, con menos información a la vez (a partir de la devolución de una profesora: "está todo junto, me mareó"):
+
+- **Enlaces por rol:** `v4/?rol=docente&nivel=jardin` entra directo con ese rol, sin la barra amarilla ni carteles. El botón "Enlaces por rol" los lista todos.
+- **Modo presentación:** oculta los carteles de maqueta ("nuevo", "a confirmar" y notas).
+- **Módulos por nivel:** Jardín (Sala de 5 "Celeste") solo tiene mensajería, comunicados y foro de la sala; los chicos no tienen usuario.
+- **Inicio:** una sola lista ("Lo importante de hoy" o "Para hacer hoy") y como mucho una tarjeta más; el resto detrás de "Ver más".
+- **Aula:** solo la unidad en curso abierta, objetivos plegados y tareas plegadas debajo de su contenido.
+
+Archivos propios: `v4/js/data4.js` (jardín y unidades extra) y `v4/js/simple.js` (todos los cambios).
+
 ## Archivos de la versión 3
 - `js/data.js`, `js/data2.js` — datos de prueba de las versiones anteriores
 - `js/data3.js` — unidades, objetivos, contenidos y tareas vinculados, curso de secundaria y foros
